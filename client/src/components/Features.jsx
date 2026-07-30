@@ -1,6 +1,6 @@
 import { ShieldCheck, Zap, Globe } from "lucide-react";
 
-function Features() {
+function Features({ darkMode }) {
   const features = [
     {
       icon: <ShieldCheck className="w-10 h-10 text-blue-600" />,
@@ -23,30 +23,46 @@ function Features() {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6">
+    <section
+      className={`py-24 transition-all duration-300 ${darkMode ? "bg-slate-950" : "bg-slate-50"
+        }`}>
+      <div className="max-w-7xl mx-auto px-6 text-center">
 
-        <h2 className="text-4xl font-bold text-center mb-4">
+        <h2
+          className={`text-4xl font-bold ${darkMode ? "text-white" : "text-gray-900"
+            }`}
+        >
           Why Choose Reality Check AI?
         </h2>
 
-        <p className="text-center text-gray-600 mb-12">
+
+        <p
+          className={`mt-4 ${darkMode ? "text-slate-300" : "text-gray-600"
+            }`}
+        >
           Verify information confidently with AI-powered fact checking.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 mt-16">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition"
-            >
+              className={`rounded-3xl p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${darkMode
+                ? "bg-slate-900 border border-slate-700 shadow-slate-900"
+                : "bg-white shadow-lg"
+                }`}            >
               {feature.icon}
 
-              <h3 className="text-xl font-bold mt-5">
-                {feature.title}
+              <h3
+                className={`text-2xl font-bold mt-6 ${darkMode ? "text-white" : "text-gray-900"
+                  }`}
+              >{feature.title}
               </h3>
 
-              <p className="text-gray-600 mt-3">
+              <p
+                className={`mt-3 ${darkMode ? "text-slate-300" : "text-gray-600"
+                  }`}
+              >
                 {feature.description}
               </p>
             </div>

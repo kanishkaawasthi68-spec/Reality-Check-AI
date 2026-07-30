@@ -1,60 +1,242 @@
-function ResultCard({ result }) {
-  return (
-    <div className="mt-10 bg-white border rounded-2xl shadow-lg p-6 text-left">
-      <h2 className="text-2xl font-bold text-blue-700 mb-6">
-        AI Verification Result
-      </h2>
+function ResultCard({ result, darkMode }) {
+  const verdict = result.verdict?.toLowerCase() || "uncertain";
 
-      <div className="space-y-5">
-        <div>
-          <p className="font-semibold text-gray-700">✅ Verdict</p>
+  const verdictColor = {
+    true: "bg-green-600",
+    false: "bg-red-600",
+    misleading: "bg-orange-500",
+    uncertain: "bg-gray-500",
+  };
+
+  const handleCopy = () => {
+    const text = `Reality Check AI
+
+Verdict: ${result.verdict}
+
+Confidence: ${result.confidence}%
+
+Reason:
+${result.reason}
+
+Sources:
+${result.sources?.join("\n") || "No sources available"}
+`;
+
+    navigator.clipboard.writeText(text);
+    alert("✅ Result copied successfully!");
+  };
+
+  const handleShare = async () => {
+    const text = `Reality Check AI
+
+Verdict: ${result.verdict}
+
+Confidence: ${result.confidence}%
+
+Reason:
+${result.reason}
+
+Sources:
+${result.sources?.join("\n") || "No sources available"}
+`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Reality Check AI Result",
+          text,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      alert("Sharing is not supported on this browser.");
+    }
+  };
+
+  return (
+    <div
+      className={`mt-10 rounded-3xl p-8 text-left transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl ${
+        darkMode
+          ? "bg-slate-900 border border-slate-700"
+          : "bg-white/80 backdrop-blur-xl border border-white/30"
+      }`}
+    >
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+        <h2
+          className={`text-3xl font-extrabold ${
+            darkMode ? "text-white" : "text-blue-600"
+          }`}
+        >
+          AI Verification Result
+        </h2>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleCopy}
+            className="px-5 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 hover:scale-105 transition-all"
+          >
+            📋 Copy
+          </button>
+
+          <button
+            onClick={handleShare}
+            className="px-5 py-2 rounded-xl bg-green-600 text-white font-semibold shadow-lg hover:bg-green-700 hover:scale-105 transition-all"
+          >
+            🔗 Share
+          </button>
+        </div>
+      </div>
+
+      {/* Cards */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Verdict */}
+        <div
+          className={`rounded-2xl border p-5 shadow-sm ${
+            darkMode
+              ? "bg-slate-800 border-slate-700"
+              : "bg-white border-gray-200"
+          }`}
+        >
+          <p
+            className={`font-semibold ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
+          >
+            ✅ Verdict
+          </p>
 
           <span
-            className={`inline-block px-4 py-2 rounded-full font-semibold text-white ${
-              result.verdict?.toLowerCase().includes("true")
-                ? "bg-green-600"
-                : result.verdict?.toLowerCase().includes("false")
-                ? "bg-red-600"
-                : "bg-yellow-500"
+            className={`inline-flex items-center mt-3 px-6 py-2 rounded-full text-white font-bold shadow-lg ${
+              verdictColor[verdict] || "bg-gray-500"
             }`}
           >
             {result.verdict}
           </span>
         </div>
 
-        <div>
-          <p className="font-semibold text-gray-700">🎯 Confidence</p>
+        {/* Confidence */}
+        <div
+          className={`rounded-2xl border p-5 shadow-sm ${
+            darkMode
+              ? "bg-slate-800 border-slate-700"
+              : "bg-white border-gray-200"
+          }`}
+        >
+          <p
+            className={`font-semibold mb-3 ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
+          >
+            🎯 Confidence
+          </p>
 
-          <div className="mt-2">
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-blue-600 h-3 rounded-full"
-                style={{
-                  width: result.confidence || "0%",
-                }}
-              ></div>
+          <div
+            className={`w-full h-4 rounded-full overflow-hidden ${
+              darkMode ? "bg-slate-700" : "bg-gray-200"
+            }`}
+          >
+            <div
+              className={`h-4 transition-all duration-1000 ${
+                result.confidence >= 80
+                  ? "bg-green-500"
+                  : result.confidence >= 50
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
+              }`}
+              style={{
+                width: `${result.confidence || 0}%`,
+              }}
+            ></div>
+          </div>
+
+          <div className="mt-4 flex justify-center">
+            <div
+              className={`px-4 py-2 rounded-full font-bold ${
+                darkMode
+                  ? "bg-slate-700 text-blue-300"
+                  : "bg-blue-100 text-blue-700"
+              }`}
+            >
+              {result.confidence}% Confidence
             </div>
-
-            <p className="mt-2 font-medium">
-              {result.confidence}
-            </p>
           </div>
         </div>
 
-        <div>
-          <p className="font-semibold text-gray-700">📖 Reason</p>
-          <p>{result.reason}</p>
+        {/* Reason */}
+        <div
+          className={`rounded-2xl border p-5 shadow-sm md:col-span-2 ${
+            darkMode
+              ? "bg-slate-800 border-slate-700"
+              : "bg-white border-gray-200"
+          }`}
+        >
+          <p
+            className={`font-semibold mb-3 ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
+          >
+            📖 Reason
+          </p>
+
+          <p
+            className={`leading-7 ${
+              darkMode ? "text-slate-300" : "text-gray-600"
+            }`}
+          >
+            {result.reason}
+          </p>
         </div>
+      </div>
 
-        <div>
-          <p className="font-semibold text-gray-700">🔗 Sources</p>
+      {/* Sources */}
+      <div
+        className={`mt-6 rounded-2xl border p-5 shadow-sm ${
+          darkMode
+            ? "bg-slate-800 border-slate-700"
+            : "bg-white border-gray-200"
+        }`}
+      >
+        <p
+          className={`font-semibold mb-4 ${
+            darkMode ? "text-white" : "text-gray-700"
+          }`}
+        >
+          🔗 Sources
+        </p>
 
-          <ul className="list-disc ml-6 mt-2">
-            {result.sources?.map((source, index) => (
-              <li key={index}>{source}</li>
+        {result.sources?.length ? (
+          <ul className="space-y-3">
+            {result.sources.map((source, index) => (
+              <li
+                key={index}
+                className={`rounded-xl p-4 transition hover:shadow-md ${
+                  darkMode
+                    ? "bg-slate-700 border border-slate-600"
+                    : "bg-blue-50 border border-blue-100"
+                }`}
+              >
+                <a
+                  href={source}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`font-semibold break-all ${
+                    darkMode
+                      ? "text-blue-400 hover:text-cyan-300"
+                      : "text-blue-700 hover:text-purple-700"
+                  }`}
+                >
+                  {source}
+                </a>
+              </li>
             ))}
           </ul>
-        </div>
+        ) : (
+          <p className={darkMode ? "text-slate-400" : "text-gray-500"}>
+            No sources available.
+          </p>
+        )}
       </div>
     </div>
   );

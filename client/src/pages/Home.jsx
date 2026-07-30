@@ -1,19 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Hero from "../components/Hero";
 import ClaimInput from "../components/ClaimInput";
 import ResultCard from "../components/ResultCard";
 import Features from "../components/Features";
 import Footer from "../components/Footer";
 
-function Home() {
+function Home({ darkMode }) {
   const [claim, setClaim] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
-
-  useEffect(() => {
-    console.log("Reality Check AI Loaded");
-  }, []);
 
   const handleVerify = async () => {
     if (!claim.trim()) {
@@ -21,9 +17,9 @@ function Home() {
       return;
     }
 
+    setLoading(true);
     setError("");
     setResult(null);
-    setLoading(true);
 
     try {
       const response = await fetch("http://localhost:5000/verify", {
@@ -41,9 +37,8 @@ function Home() {
       }
 
       setResult(data);
-    } catch (error) {
-      console.error(error);
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -51,11 +46,13 @@ function Home() {
 
   return (
     <>
-      {/* Hero Section */}
-      <Hero />
+      <Hero darkMode={darkMode} />
 
-      {/* Verify Section */}
-      <main className="flex flex-col items-center px-4 py-12">
+      <main
+        className={`min-h-screen flex flex-col items-center px-4 py-12 transition-all duration-300 ${
+          darkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-black"
+        }`}
+      >
         <section
           id="verify-section"
           className="w-full max-w-3xl text-center"
@@ -66,29 +63,50 @@ function Home() {
             error={error}
             loading={loading}
             handleVerify={handleVerify}
+            darkMode={darkMode}
           />
 
           {/* Loading */}
           {loading && (
-            <div className="flex flex-col items-center mt-8">
-              <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div
+              className={`mt-8 rounded-2xl shadow-xl p-8 flex flex-col items-center border ${
+                darkMode
+                  ? "bg-slate-900 border-slate-700"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
 
-              <p className="mt-4 text-blue-600 font-medium">
-                AI is verifying your claim...
+              <h3
+                className={`mt-5 text-xl font-bold ${
+                  darkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                AI is analyzing your claim...
+              </h3>
+
+              <p
+                className={`mt-2 text-center ${
+                  darkMode ? "text-slate-300" : "text-gray-500"
+                }`}
+              >
+                Please wait while Reality Check AI verifies your information.
               </p>
             </div>
           )}
 
           {/* Result */}
-          {result && <ResultCard result={result} />}
+          {result && (
+            <ResultCard
+              result={result}
+              darkMode={darkMode}
+            />
+          )}
         </section>
       </main>
 
-      {/* Features */}
-      <Features />
-
-      {/* Footer */}
-      <Footer />
+      <Features darkMode={darkMode} />
+      <Footer darkMode={darkMode} />
     </>
   );
 }

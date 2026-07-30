@@ -1,8 +1,15 @@
-function Login(){
-    return(
-        <main className="flex items-center justify-center min-h-[80vh]">
-            <h1 className="text-5xl font-bold">Login Page</h1>
-        </main>
-    );
-} 
+import LoginHero from "../components/LoginHero";
+import LoginForm from "../components/LoginForm";
+import Footer from "../components/Footer";
+
+function Login({ darkMode }) {
+  return (
+    <>
+      <LoginHero darkMode={darkMode} />
+      <LoginForm darkMode={darkMode} />
+      <Footer darkMode={darkMode} />
+    </>
+  );
+}
+
 export default Login;

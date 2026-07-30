@@ -1,10 +1,19 @@
-function Contact() {
-    return (
-        <main className="flex items-center justify-center min-h-[80vh]">
-            <h1 className="text-5xl font-bold">Contact Page</h1>
+import ContactHero from "../components/ContactHero";
+import ContactInfo from "../components/ContactInfo";
+import ContactForm from "../components/ContactForm";
+import ContactMap from "../components/ContactMap";
+import Footer from "../components/Footer";
 
-        </main>
-
-    );
+function Contact({ darkMode }) {
+  return (
+    <>
+      <ContactHero darkMode={darkMode} />
+      <ContactInfo darkMode={darkMode} />
+      <ContactForm darkMode={darkMode} />
+      <ContactMap darkMode={darkMode} />
+      <Footer darkMode={darkMode} />
+    </>
+  );
 }
+
 export default Contact;
