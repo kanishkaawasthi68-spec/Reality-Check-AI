@@ -69,29 +69,59 @@ function Home({ darkMode }) {
           {/* Loading */}
           {loading && (
             <div
-              className={`mt-8 rounded-2xl shadow-xl p-8 flex flex-col items-center border ${
+              className={`mt-8 rounded-3xl p-8 shadow-2xl border transition-all duration-300 ${
                 darkMode
                   ? "bg-slate-900 border-slate-700"
                   : "bg-white border-gray-200"
               }`}
             >
-              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 border-[6px] border-blue-600 border-t-transparent rounded-full animate-spin"></div>
 
-              <h3
-                className={`mt-5 text-xl font-bold ${
-                  darkMode ? "text-white" : "text-gray-800"
-                }`}
-              >
-                AI is analyzing your claim...
-              </h3>
+                <h3
+                  className={`mt-6 text-2xl font-bold ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  🤖 AI is Verifying...
+                </h3>
 
-              <p
-                className={`mt-2 text-center ${
-                  darkMode ? "text-slate-300" : "text-gray-500"
-                }`}
-              >
-                Please wait while Reality Check AI verifies your information.
-              </p>
+                <p
+                  className={`mt-2 ${
+                    darkMode ? "text-slate-300" : "text-gray-600"
+                  }`}
+                >
+                  Searching trusted sources...
+                </p>
+
+                <div
+                  className={`mt-8 w-full rounded-full h-2 overflow-hidden ${
+                    darkMode ? "bg-slate-700" : "bg-gray-200"
+                  }`}
+                >
+                  <div className="h-full w-1/2 bg-blue-600 animate-pulse"></div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 gap-3 w-full">
+                  <div
+                    className={`h-5 rounded animate-pulse ${
+                      darkMode ? "bg-slate-700" : "bg-gray-200"
+                    }`}
+                  ></div>
+
+                  <div
+                    className={`h-5 rounded animate-pulse ${
+                      darkMode ? "bg-slate-700" : "bg-gray-200"
+                    }`}
+                  ></div>
+
+                  <div
+                    className={`h-5 rounded animate-pulse ${
+                      darkMode ? "bg-slate-700" : "bg-gray-200"
+                    }`}
+                  ></div>
+                </div>
+              </div>
             </div>
           )}
 
