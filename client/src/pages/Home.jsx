@@ -22,7 +22,7 @@ function Home({ darkMode }) {
     setResult(null);
 
     try {
-      const response = await fetch("http://localhost:5000/verify", {
+      const response = await fetch("https://reality-check-ai-e7lb.onrender.com/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
