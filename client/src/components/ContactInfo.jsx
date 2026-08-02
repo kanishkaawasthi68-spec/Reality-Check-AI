@@ -3,22 +3,25 @@ function ContactInfo({ darkMode }) {
     {
       icon: "📧",
       title: "Email",
-      value: "support@realitycheckai.com",
+      value: "kanishkaawasthi68@gmail.com",
+      link: "mailto:kanishkaawasthi68@gmail.com",
     },
     {
-      icon: "📞",
-      title: "Phone",
-      value: "+91 98765 43210",
+      icon: "💼",
+      title: "LinkedIn",
+      value: "www.linkedin.com/in/kanishka-awasthi-81b98a291",
+      link: "https://www.linkedin.com/in/kanishka-awasthi-81b98a291",
+    },
+    {
+      icon: "💻",
+      title: "GitHub",
+      value: "github.com/kanishkaawasthi68-spec",
+      link: "https://github.com/kanishkaawasthi68-spec",
     },
     {
       icon: "📍",
       title: "Location",
       value: "Kanpur, Uttar Pradesh, India",
-    },
-    {
-      icon: "⏰",
-      title: "Working Hours",
-      value: "Mon - Fri | 9:00 AM - 6:00 PM",
     },
   ];
 
@@ -49,13 +52,26 @@ function ContactInfo({ darkMode }) {
                 {item.title}
               </h3>
 
-              <p
-                className={`mt-3 ${
-                  darkMode ? "text-slate-300" : "text-gray-600"
-                }`}
-              >
-                {item.value}
-              </p>
+              {item.link ? (
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`mt-3 block break-all hover:text-blue-500 transition-colors duration-300 ${
+                    darkMode ? "text-slate-300" : "text-gray-600"
+                  }`}
+                >
+                  {item.value}
+                </a>
+              ) : (
+                <p
+                  className={`mt-3 ${
+                    darkMode ? "text-slate-300" : "text-gray-600"
+                  }`}
+                >
+                  {item.value}
+                </p>
+              )}
             </div>
           ))}
         </div>
