@@ -74,17 +74,6 @@ function Footer({ darkMode }) {
                 Contact
               </Link>
             </li>
-
-            <li>
-              <Link
-                to="/login"
-                className={`${
-                  darkMode ? "text-slate-400" : "text-gray-600"
-                } hover:text-blue-500 transition-all duration-300 hover:translate-x-1 inline-block`}
-              >
-                Login
-              </Link>
-            </li>
           </ul>
         </div>
 
@@ -178,7 +167,11 @@ function Footer({ darkMode }) {
             : "border-gray-200 text-gray-500"
         }`}
       >
-        © 2026 Reality Check AI. All Rights Reserved.
+        <p>© 2026 Reality Check AI. All Rights Reserved.</p>
+
+        <p className="mt-2 text-sm">
+          Built with ❤️ using React, Node.js & AI
+        </p>
       </div>
     </footer>
   );
