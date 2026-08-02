@@ -9,9 +9,9 @@ function Footer({ darkMode }) {
           : "bg-white border-gray-200"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-2 lg:grid-cols-3 gap-10">
         {/* Logo */}
-        <div>
+        <div className="col-span-2 lg:col-span-1">
           <h2
             className={`text-3xl font-black ${
               darkMode ? "text-white" : "text-gray-900"
@@ -26,6 +26,7 @@ function Footer({ darkMode }) {
             }`}
           >
             Verify news, claims and information using AI.
+            <br />
             Make informed decisions with confidence.
           </p>
         </div>
@@ -99,7 +100,7 @@ function Footer({ darkMode }) {
 
           <div className="space-y-3">
             <a
-              href="https://github.com/"
+              href="https://github.com/kanishkaawasthi68-spec"
               target="_blank"
               rel="noopener noreferrer"
               className={`block ${
@@ -110,7 +111,7 @@ function Footer({ darkMode }) {
             </a>
 
             <a
-              href="https://linkedin.com/"
+              href="https://www.linkedin.com/in/kanishka-awasthi-81b98a291"
               target="_blank"
               rel="noopener noreferrer"
               className={`block ${
@@ -121,7 +122,7 @@ function Footer({ darkMode }) {
             </a>
 
             <a
-              href="mailto:your@email.com"
+              href="mailto:kanishkaawasthi68@gmail.com"
               className={`block ${
                 darkMode ? "text-slate-400" : "text-gray-600"
               } hover:text-blue-500 transition-all duration-300 hover:translate-x-1`}
