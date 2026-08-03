@@ -6,7 +6,6 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Login from "./pages/Login";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -28,7 +27,6 @@ function App() {
     >
       <Navbar
         title="Reality Check AI"
-        buttonText="Login"
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
@@ -49,10 +47,7 @@ function App() {
           element={<Contact darkMode={darkMode} />}
         />
 
-        <Route
-          path="/login"
-          element={<Login darkMode={darkMode} />}
-        />
+
       </Routes>
     </div>
   );
