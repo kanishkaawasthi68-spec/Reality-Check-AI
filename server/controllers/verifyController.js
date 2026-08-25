@@ -12,7 +12,7 @@ async function verifyController(req, res) {
       });
     }
 
-    // Search latest news
+    // Search news using Serper
     const searchResults = await searchNews(claim);
 
     const searchContext =
@@ -25,10 +25,10 @@ async function verifyController(req, res) {
             .join("\n\n")
         : "No recent search results found.";
 
-    // AI Verification
+    // Verify claim using Groq
     const aiResponse = await verifyClaim(claim, searchContext);
 
-    // Clean AI Response
+    // Clean AI response
     const cleanedResponse = cleanJson(aiResponse);
 
     let parsedResult;
@@ -36,16 +36,20 @@ async function verifyController(req, res) {
     try {
       parsedResult = JSON.parse(cleanedResponse);
     } catch (error) {
+      console.error("JSON Parse Error:", error);
+      console.error("Raw AI Response:", aiResponse);
+
       return res.status(500).json({
         message: "AI returned invalid JSON.",
-        raw: aiResponse,
       });
     }
 
     return res.json({
       ...parsedResult,
+
       sources:
-        parsedResult.sources?.length > 0
+        Array.isArray(parsedResult.sources) &&
+        parsedResult.sources.length > 0
           ? parsedResult.sources
           : searchResults.slice(0, 3).map((item) => item.link),
     });
@@ -53,7 +57,7 @@ async function verifyController(req, res) {
     console.error("Verification Error:", error);
 
     return res.status(500).json({
-      message: "Internal Server Error",
+      message: error.message || "Internal Server Error",
     });
   }
 }

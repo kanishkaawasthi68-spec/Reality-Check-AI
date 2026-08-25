@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Hero({ darkMode }) {
   const scrollToVerify = () => {
     const section = document.getElementById("verify-section");
@@ -5,40 +7,45 @@ function Hero({ darkMode }) {
     if (section) {
       section.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
     }
   };
 
   return (
     <section
-      className={`relative overflow-hidden transition-all duration-300 ${darkMode ? "bg-slate-950" : "bg-slate-50"
-        }`}
+      className={`relative overflow-hidden transition-all duration-300 ${
+        darkMode
+          ? "bg-slate-950"
+          : "bg-slate-50"
+      }`}
     >
       {/* Background Glow */}
       <div
-        className={`absolute top-0 left-0 w-72 h-72 rounded-full blur-3xl ${darkMode
-            ? "bg-blue-700/20"
-            : "bg-blue-200/30"
-          }`}
-      ></div>
+        className={`absolute -top-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
+          darkMode ? "bg-blue-700/10" : "bg-blue-200/30"
+        }`}
+      />
 
       <div
-        className={`absolute bottom-0 right-0 w-72 h-72 rounded-full blur-3xl ${darkMode
-            ? "bg-cyan-700/20"
-            : "bg-cyan-200/30"
-          }`}
-      ></div>
+        className={`absolute -bottom-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
+          darkMode ? "bg-cyan-700/10" : "bg-cyan-200/30"
+        }`}
+      />
 
-      <div className="relative max-w-7xl mx-auto px-6 py-28 text-center">
-        {/* Tag */}
-        <p className="text-blue-500 font-semibold uppercase tracking-widest">
-          AI Powered Fact Checker
-        </p>
+      {/* Hero Content */}
+      <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24 text-center">
+
+        {/* Small Label */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold">
+          🤖 AI Powered Fact Checker
+        </div>
 
         {/* Heading */}
         <h1
-          className={`mt-4 text-5xl md:text-7xl font-black leading-tight ${darkMode ? "text-white" : "text-gray-900"
-            }`}
+          className={`mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
         >
           Verify Before You
           <span className="text-blue-600"> Trust</span>
@@ -46,8 +53,9 @@ function Hero({ darkMode }) {
 
         {/* Description */}
         <p
-          className={`mt-8 max-w-3xl mx-auto text-xl leading-9 ${darkMode ? "text-slate-300" : "text-gray-600"
-            }`}
+          className={`mt-6 max-w-2xl mx-auto text-lg md:text-xl leading-8 ${
+            darkMode ? "text-slate-300" : "text-gray-600"
+          }`}
         >
           Detect fake news, misleading claims, and misinformation using
           Artificial Intelligence. Get reliable verification with confidence
@@ -55,43 +63,47 @@ function Hero({ darkMode }) {
         </p>
 
         {/* Buttons */}
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
           <button
             onClick={scrollToVerify}
-            className="px-8 py-4 rounded-2xl bg-blue-600 text-white font-bold shadow-xl hover:bg-blue-700 hover:scale-105 transition-all duration-300"
+            className="px-7 py-3.5 rounded-xl bg-blue-600 text-white font-bold shadow-lg hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-300"
           >
-            🔍 Verify Claim
+            🔍 Verify a Claim
           </button>
 
-          <button
-            className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-xl ${darkMode
-                ? "bg-slate-800 text-white border border-slate-700 hover:bg-slate-700"
-                : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-100"
-              }`}
+          <Link
+            to="/about"
+            className={`px-7 py-3.5 rounded-xl font-bold border transition-all duration-300 hover:-translate-y-0.5 ${
+              darkMode
+                ? "bg-slate-900 text-white border-slate-700 hover:bg-slate-800"
+                : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
+            }`}
           >
             Learn More
-          </button>
+          </Link>
         </div>
 
-        {/* Trust Badges */}
-        <div className="mt-14 flex flex-wrap justify-center gap-5">
+        {/* Trust Indicators */}
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
           {[
-            "✅ AI Powered",
-            "🌍 Trusted Sources",
-            "⚡ Instant Results",
-            "🔒 Secure Verification",
+            "✓ AI Powered",
+            "✓ Trusted Sources",
+            "✓ Fast Results",
+            "✓ Reliable Analysis",
           ].map((badge) => (
             <span
               key={badge}
-              className={`px-5 py-3 rounded-full shadow-md font-semibold transition-all duration-300 ${darkMode
-                  ? "bg-slate-800 text-slate-200 border border-slate-700"
-                  : "bg-white text-gray-700"
-                }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium border ${
+                darkMode
+                  ? "bg-slate-900 border-slate-700 text-slate-300"
+                  : "bg-white border-gray-200 text-gray-600"
+              }`}
             >
               {badge}
             </span>
           ))}
         </div>
+
       </div>
     </section>
   );

@@ -5,64 +5,90 @@ const groq = new Groq({
 });
 
 async function verifyClaim(claim, searchContext) {
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "system",
-        content: `
+  try {
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY is missing");
+    }
+
+    const completion = await groq.chat.completions.create({
+      model: "openai/gpt-oss-120b",
+
+      messages: [
+        {
+          role: "system",
+          content: `
 You are Reality Check AI, an expert AI fact-checking assistant.
 
+Return ONLY valid JSON.
+
 Rules:
-- Return ONLY valid JSON.
-- Never return markdown.
-- Never explain outside JSON.
-- Verdict must be ONLY one of:
+- Verdict must be exactly one of:
   True
   False
   Misleading
   Uncertain
-- Confidence must be a NUMBER between 0 and 100.
-- Keep the reason short and easy to understand.
-- If reliable sources are unavailable, return an empty array.
+
+- Confidence must be a number between 0 and 100.
+- Reason must be under 50 words.
+- Sources must always be an array.
+- Never return markdown.
+- Never write anything outside JSON.
 `,
-      },
-      {
-        role: "user",
-        content: `
+        },
+
+        {
+          role: "user",
+          content: `
 Claim:
 "${claim}"
 
-Latest Search Results:
+Search Results:
 ${searchContext}
 
-Instructions:
-- Analyze the claim using ONLY the search results above.
-- Use only the URLs from the search results in the sources array.
-- If the search results strongly support the claim, verdict = True.
-- If they strongly contradict the claim, verdict = False.
-- If evidence is mixed, verdict = Misleading.
-- If there isn't enough reliable information, verdict = Uncertain.
-- Confidence must be a number between 0 and 100.
-- Keep the reason under 50 words.
+Analyze the claim using the search results above.
 
-Return ONLY valid JSON in this format:
+Rules:
+- If the search results strongly support the claim, use "True".
+- If the search results strongly contradict the claim, use "False".
+- If evidence is mixed, use "Misleading".
+- If there is not enough reliable information, use "Uncertain".
+- Use only URLs present in the search results.
+- Confidence must be between 0 and 100.
+- Keep the reason short.
+
+Return ONLY this JSON:
 
 {
   "verdict": "True",
   "confidence": 95,
   "reason": "Short explanation.",
-  "sources": [
-    "https://source1.com",
-    "https://source2.com"
-  ]
+  "sources": []
 }
 `,
-      },
-    ],
-  });
+        },
+      ],
 
-  return completion.choices[0].message.content.trim();
+      temperature: 0.2,
+      max_completion_tokens: 1024,
+    });
+
+    const content = completion?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Groq returned an empty response");
+    }
+
+    console.log("Groq Response:", content);
+
+    return content.trim();
+  } catch (error) {
+    console.error(
+      "Groq Error:",
+      error?.response?.data || error?.message || error
+    );
+
+    throw error;
+  }
 }
 
 module.exports = {

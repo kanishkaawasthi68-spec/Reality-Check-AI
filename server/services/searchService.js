@@ -2,6 +2,10 @@ const axios = require("axios");
 
 async function searchNews(query) {
   try {
+    if (!process.env.SERPER_API_KEY) {
+      throw new Error("SERPER_API_KEY is missing");
+    }
+
     const response = await axios.post(
       "https://google.serper.dev/news",
       {
@@ -20,7 +24,7 @@ async function searchNews(query) {
   } catch (error) {
     console.error(
       "Serper Error:",
-      error.response?.data || error.message
+      error?.response?.data || error?.message || error
     );
 
     return [];
