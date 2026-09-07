@@ -60,7 +60,7 @@ function Home({ darkMode }) {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/verify",
+        "https://reality-check-ai-2.onrender.com/verify",
         {
           method: "POST",
           headers: {
@@ -113,7 +113,7 @@ function Home({ darkMode }) {
       formData.append("image", image);
 
       const response = await fetch(
-        "http://localhost:5000/image-verify",
+        "https://reality-check-ai-2.onrender.com/image-verify",
         {
           method: "POST",
           body: formData,
