@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon, ShieldCheck } from "lucide-react";
 
 
 function Navbar({
@@ -28,12 +28,15 @@ function Navbar({
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
 
         {/* Logo */}
-        <h2
-          className={`text-2xl md:text-3xl font-extrabold ${darkMode ? "text-white" : "text-gray-900"
-            }`}
-        >
-          {title}
-        </h2>
+        <NavLink to="/" className="flex items-center gap-2">
+          <ShieldCheck className={`w-6 h-6 ${darkMode ? "text-blue-400" : "text-blue-600"}`} aria-hidden="true" />
+          <h2
+            className={`text-xl md:text-2xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-gray-900"
+              }`}
+          >
+            {title}
+          </h2>
+        </NavLink>
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex gap-8">
@@ -64,9 +67,10 @@ function Navbar({
                 newTheme ? "dark" : "light"
               );
             }}
-            className="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            className="p-2.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors duration-200"
           >
-            {darkMode ? "☀️" : "🌙"}
+            {darkMode ? <Sun className="w-4 h-4" aria-hidden="true" /> : <Moon className="w-4 h-4" aria-hidden="true" />}
           </button>
         </div>
 
@@ -82,13 +86,16 @@ function Navbar({
                 newTheme ? "dark" : "light"
               );
             }}
-            className="px-3 py-2 rounded-lg bg-slate-800 text-white"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            className="p-2 rounded-lg bg-slate-800 text-white"
           >
-            {darkMode ? "☀️" : "🌙"}
+            {darkMode ? <Sun className="w-4 h-4" aria-hidden="true" /> : <Moon className="w-4 h-4" aria-hidden="true" />}
           </button>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
             className={`p-2 rounded-lg ${darkMode ? "text-white" : "text-gray-900"
               }`}
           >

@@ -1,49 +1,35 @@
 import { Link } from "react-router-dom";
+import { Search, ShieldCheck, Zap, Globe2 } from "lucide-react";
 
 function Hero({ darkMode }) {
   const scrollToVerify = () => {
     const section = document.getElementById("verify-section");
-
     if (section) {
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
   return (
-    <section
-      className={`relative overflow-hidden transition-all duration-300 ${
-        darkMode
-          ? "bg-slate-950"
-          : "bg-slate-50"
-      }`}
-    >
-      {/* Background Glow */}
+    <section className={`relative overflow-hidden ${darkMode ? "bg-slate-950" : "bg-slate-50"}`}>
+      {/* Subtle static background accent — no animation, single soft glow */}
       <div
-        className={`absolute -top-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
-          darkMode ? "bg-blue-700/10" : "bg-blue-200/30"
+        className={`absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-3xl pointer-events-none ${
+          darkMode ? "bg-blue-700/10" : "bg-blue-200/40"
         }`}
       />
 
-      <div
-        className={`absolute -bottom-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
-          darkMode ? "bg-cyan-700/10" : "bg-cyan-200/30"
-        }`}
-      />
-
-      {/* Hero Content */}
-      <div className="relative max-w-6xl mx-auto px-6 py-20 md:py-24 text-center">
-
-        {/* Small Label */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold">
-          🤖 AI Powered Fact Checker
+      <div className="relative max-w-4xl mx-auto px-6 py-20 md:py-24 text-center">
+        <div
+          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border ${
+            darkMode ? "bg-slate-900 border-slate-800 text-blue-400" : "bg-white border-gray-200 text-blue-700"
+          }`}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
+          AI-Powered Fact Checker
         </div>
 
-        {/* Heading */}
         <h1
-          className={`mt-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight ${
+          className={`mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.1] tracking-tight ${
             darkMode ? "text-white" : "text-gray-900"
           }`}
         >
@@ -51,31 +37,25 @@ function Hero({ darkMode }) {
           <span className="text-blue-600"> Trust</span>
         </h1>
 
-        {/* Description */}
-        <p
-          className={`mt-6 max-w-2xl mx-auto text-lg md:text-xl leading-8 ${
-            darkMode ? "text-slate-300" : "text-gray-600"
-          }`}
-        >
-          Detect fake news, misleading claims, and misinformation using
-          Artificial Intelligence. Get reliable verification with confidence
-          scores and trusted sources in seconds.
+        <p className={`mt-5 max-w-xl mx-auto text-base md:text-lg leading-7 ${darkMode ? "text-slate-300" : "text-gray-600"}`}>
+          Check claims, articles, and images against independent evidence — with a clear verdict,
+          honest confidence estimate, and the sources behind it.
         </p>
 
-        {/* Buttons */}
-        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
           <button
             onClick={scrollToVerify}
-            className="px-7 py-3.5 rounded-xl bg-blue-600 text-white font-bold shadow-lg hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-300"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-200"
           >
-            🔍 Verify a Claim
+            <Search className="w-4 h-4" aria-hidden="true" />
+            Verify Something
           </button>
 
           <Link
             to="/about"
-            className={`px-7 py-3.5 rounded-xl font-bold border transition-all duration-300 hover:-translate-y-0.5 ${
+            className={`inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold border transition-colors duration-200 ${
               darkMode
-                ? "bg-slate-900 text-white border-slate-700 hover:bg-slate-800"
+                ? "bg-slate-900 text-white border-slate-800 hover:bg-slate-800"
                 : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             }`}
           >
@@ -83,27 +63,17 @@ function Hero({ darkMode }) {
           </Link>
         </div>
 
-        {/* Trust Indicators */}
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          {[
-            "✓ AI Powered",
-            "✓ Trusted Sources",
-            "✓ Fast Results",
-            "✓ Reliable Analysis",
-          ].map((badge) => (
-            <span
-              key={badge}
-              className={`px-4 py-2 rounded-full text-sm font-medium border ${
-                darkMode
-                  ? "bg-slate-900 border-slate-700 text-slate-300"
-                  : "bg-white border-gray-200 text-gray-600"
-              }`}
-            >
-              {badge}
-            </span>
-          ))}
+        <div className={`mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-medium ${darkMode ? "text-slate-500" : "text-gray-500"}`}>
+          <span className="inline-flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" /> Evidence-grounded
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Globe2 className="w-3.5 h-3.5" aria-hidden="true" /> Independent sources
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5" aria-hidden="true" /> Fast results
+          </span>
         </div>
-
       </div>
     </section>
   );

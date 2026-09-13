@@ -1,75 +1,114 @@
 const Groq = require("groq-sdk");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+// Lazily construct the client so a missing GROQ_API_KEY only breaks the
+// verification endpoints (with a clean error message) instead of crashing
+// the entire server on startup.
+let groq = null;
 
-async function verifyClaim(claim, searchContext) {
+function getClient() {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY is missing");
+  }
+
+  if (!groq) {
+    groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  }
+
+  return groq;
+}
+
+const VALID_VERDICTS = [
+  "TRUE",
+  "MOSTLY_TRUE",
+  "PARTIALLY_TRUE",
+  "MOSTLY_FALSE",
+  "FALSE",
+  "UNCERTAIN",
+];
+
+function formatEvidenceForPrompt(evidence) {
+  if (!evidence.length) {
+    return "No relevant search results were found.";
+  }
+
+  return evidence
+    .map((item, index) => {
+      const dateLine = item.date ? `Date: ${item.date}\n` : "";
+
+      return `[Source ${index + 1}]
+Title: ${item.title}
+Domain: ${item.domain} (${item.tierLabel})
+${dateLine}URL: ${item.link}
+Snippet: ${item.snippet}`;
+    })
+    .join("\n\n");
+}
+
+async function verifyClaim(claim, evidence) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is missing");
-    }
+    const client = getClient();
+    const evidenceBlock = formatEvidenceForPrompt(evidence);
 
-    const completion = await groq.chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: "openai/gpt-oss-120b",
 
       messages: [
         {
           role: "system",
           content: `
-You are Reality Check AI, an expert AI fact-checking assistant.
+You are Reality Check AI, an evidence-based fact-checking assistant.
 
-Return ONLY valid JSON.
+You must reason ONLY from the numbered sources provided by the user message.
+You are strictly forbidden from:
+- Inventing evidence that is not in the provided sources.
+- Inventing or fabricating URLs, titles, or sources.
+- Treating a search snippet as unquestionable truth without noting uncertainty.
+- Answering purely from your own prior/background knowledge when sources are thin or absent.
 
-Rules:
-- Verdict must be exactly one of:
-  True
-  False
-  Misleading
-  Uncertain
+You must:
+- Distinguish between evidence (what a source actually states) and inference (your interpretation).
+- Consider whether sources agree or conflict with each other.
+- Prefer official/primary and well-established sources over unverified ones when they disagree, but do not blindly trust a source just because it is famous.
+- Return "UNCERTAIN" whenever the evidence is insufficient, absent, stale relative to the claim, or too weak to justify a confident verdict. Do not force a decision.
+- Never claim certainty. Confidence should reflect the actual strength/agreement of the evidence, not a guess.
+- Only cite source URLs that were given to you. Never fabricate a URL.
 
-- Confidence must be a number between 0 and 100.
-- Reason must be under 50 words.
-- Sources must always be an array.
-- Never return markdown.
-- Never write anything outside JSON.
+Return ONLY valid JSON. No markdown, no commentary outside the JSON object.
+
+The JSON schema is:
+{
+  "verdict": one of "TRUE" | "MOSTLY_TRUE" | "PARTIALLY_TRUE" | "MOSTLY_FALSE" | "FALSE" | "UNCERTAIN",
+  "confidence": integer 0-100,
+  "summary": "One or two sentence plain-language summary of the verdict.",
+  "reason": "A concise explanation (under 80 words) of why this verdict was reached, grounded in the sources.",
+  "supportingEvidence": ["short bullet point grounded in a source", ...],
+  "contradictingEvidence": ["short bullet point grounded in a source", ...],
+  "sources": [{"title": "...", "link": "...", "domain": "...", "date": "..." }]
+}
+
+Rules for the JSON fields:
+- "supportingEvidence" and "contradictingEvidence" can be empty arrays if there is nothing relevant on that side.
+- "sources" must only include entries that correspond exactly to the numbered sources you were given (same title/link/domain). Do not include a source you did not use in your reasoning.
+- If there are no usable sources at all, return verdict "UNCERTAIN", low confidence, and explain that insufficient evidence was found.
 `,
         },
 
         {
           role: "user",
           content: `
-Claim:
+Claim to verify:
 "${claim}"
 
-Search Results:
-${searchContext}
+Retrieved evidence (numbered sources, may include unrelated or low-quality results — use judgement):
+${evidenceBlock}
 
-Analyze the claim using the search results above.
-
-Rules:
-- If the search results strongly support the claim, use "True".
-- If the search results strongly contradict the claim, use "False".
-- If evidence is mixed, use "Misleading".
-- If there is not enough reliable information, use "Uncertain".
-- Use only URLs present in the search results.
-- Confidence must be between 0 and 100.
-- Keep the reason short.
-
-Return ONLY this JSON:
-
-{
-  "verdict": "True",
-  "confidence": 95,
-  "reason": "Short explanation.",
-  "sources": []
-}
+Analyze the claim strictly using the evidence above, following the rules in your instructions. Return ONLY the JSON object described in your instructions.
 `,
         },
       ],
 
       temperature: 0.2,
-      max_completion_tokens: 1024,
+      max_completion_tokens: 1400,
     });
 
     const content = completion?.choices?.[0]?.message?.content;
@@ -77,8 +116,6 @@ Return ONLY this JSON:
     if (!content) {
       throw new Error("Groq returned an empty response");
     }
-
-    console.log("Groq Response:", content);
 
     return content.trim();
   } catch (error) {
@@ -91,6 +128,81 @@ Return ONLY this JSON:
   }
 }
 
+async function verifyArticle(articleTitle, articleText, evidence) {
+  try {
+    const client = getClient();
+    const evidenceBlock = formatEvidenceForPrompt(evidence);
+
+    const completion = await client.chat.completions.create({
+      model: "openai/gpt-oss-120b",
+
+      messages: [
+        {
+          role: "system",
+          content: `
+You are Reality Check AI, an evidence-based fact-checking assistant reviewing a news/article page.
+
+First, identify the single most important, checkable factual claim made by the article (not opinions, not routine background detail).
+
+Then verify that claim strictly using the numbered independent sources provided by the user message, following the same evidence rules as claim verification:
+- Never invent evidence, sources, or URLs.
+- Distinguish evidence from inference.
+- Return "UNCERTAIN" when evidence is insufficient or the independent sources do not clearly confirm or contradict the article.
+- Prefer official/primary and well-established independent sources.
+- Never claim certainty; confidence must reflect actual evidence strength.
+
+Return ONLY valid JSON, no markdown, matching this schema:
+{
+  "extractedClaim": "The main factual claim identified in the article.",
+  "verdict": one of "TRUE" | "MOSTLY_TRUE" | "PARTIALLY_TRUE" | "MOSTLY_FALSE" | "FALSE" | "UNCERTAIN",
+  "confidence": integer 0-100,
+  "summary": "One or two sentence plain-language summary.",
+  "reason": "Concise explanation (under 80 words) grounded in the independent sources.",
+  "supportingEvidence": ["..."],
+  "contradictingEvidence": ["..."],
+  "sources": [{"title": "...", "link": "...", "domain": "...", "date": "..." }]
+}
+`,
+        },
+        {
+          role: "user",
+          content: `
+Article title: "${articleTitle || "Untitled"}"
+
+Article text (may be truncated):
+${articleText}
+
+Independent search evidence (numbered sources):
+${evidenceBlock}
+
+Identify the article's main factual claim and verify it strictly against the independent evidence above. Return ONLY the JSON object described in your instructions.
+`,
+        },
+      ],
+
+      temperature: 0.2,
+      max_completion_tokens: 1600,
+    });
+
+    const content = completion?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Groq returned an empty response");
+    }
+
+    return content.trim();
+  } catch (error) {
+    console.error(
+      "Groq Error (article):",
+      error?.response?.data || error?.message || error
+    );
+
+    throw error;
+  }
+}
+
 module.exports = {
   verifyClaim,
+  verifyArticle,
+  VALID_VERDICTS,
 };

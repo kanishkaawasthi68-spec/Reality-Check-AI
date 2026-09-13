@@ -4,14 +4,14 @@ const fs = require("fs");
 const sharp = require("sharp");
 
 async function detectImage(imagePath) {
+  const processedImagePath = `${imagePath}-processed.jpg`;
+
   try {
     console.log("Image received for detection:", imagePath);
 
     // ==========================================
     // STEP 1: Normalize image
     // ==========================================
-
-    const processedImagePath = `${imagePath}-processed.jpg`;
 
     await sharp(imagePath)
       .rotate()
@@ -162,25 +162,6 @@ async function detectImage(imagePath) {
     ];
 
     // ==========================================
-    // STEP 7: Cleanup
-    // ==========================================
-
-    try {
-      if (fs.existsSync(processedImagePath)) {
-        fs.unlinkSync(processedImagePath);
-      }
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
-    } catch (cleanupError) {
-      console.log(
-        "Temporary file cleanup warning:",
-        cleanupError.message
-      );
-    }
-
-    // ==========================================
     // FINAL RESULT
     // ==========================================
 
@@ -204,6 +185,22 @@ async function detectImage(imagePath) {
         error.message ||
         "Unable to analyze image."
     );
+  } finally {
+    // Always clean up temp files, even if detection failed partway through.
+    try {
+      if (fs.existsSync(processedImagePath)) {
+        fs.unlinkSync(processedImagePath);
+      }
+
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    } catch (cleanupError) {
+      console.log(
+        "Temporary file cleanup warning:",
+        cleanupError.message
+      );
+    }
   }
 }
 

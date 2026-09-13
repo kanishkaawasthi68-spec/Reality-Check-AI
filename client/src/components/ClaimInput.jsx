@@ -1,30 +1,54 @@
 import { useState } from "react";
+import {
+  FileText,
+  Link2,
+  ImagePlus,
+  Mic,
+  Square,
+  Search,
+  Loader2,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
+
+const MAX_CLAIM_LENGTH = 500;
 
 function ClaimInput({
   darkMode,
+
+  // Text
   claim,
   setClaim,
   error,
   loading,
   handleVerify,
 
-  // Image verification props
+  // URL
+  url,
+  setUrl,
+  urlError,
+  urlLoading,
+  handleUrlVerify,
+
+  // Verification type
   verificationType,
   setVerificationType,
+
+  // Image
   image,
   setImage,
   handleImageVerify,
   imageLoading,
+  imageError,
 }) {
   const [listening, setListening] = useState(false);
 
   const startListening = () => {
     const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Speech Recognition is not supported in this browser.");
+      alert("Speech recognition is not supported in this browser.");
       return;
     }
 
@@ -41,13 +65,8 @@ function ClaimInput({
       setClaim(event.results[0][0].transcript);
     };
 
-    recognition.onend = () => {
-      setListening(false);
-    };
-
-    recognition.onerror = () => {
-      setListening(false);
-    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
   };
 
   const handleImageChange = (event) => {
@@ -55,13 +74,11 @@ function ClaimInput({
 
     if (!selectedFile) return;
 
-    // Only allow images
     if (!selectedFile.type.startsWith("image/")) {
       alert("Please upload a valid image.");
       return;
     }
 
-    // 10 MB limit
     if (selectedFile.size > 10 * 1024 * 1024) {
       alert("Image size should be less than 10 MB.");
       return;
@@ -70,214 +87,207 @@ function ClaimInput({
     setImage(selectedFile);
   };
 
+  const tabs = [
+    { id: "text", label: "Claim", icon: FileText },
+    { id: "url", label: "URL", icon: Link2 },
+    { id: "image", label: "Image", icon: ImagePlus },
+  ];
+
   return (
     <div
-      className={`relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-xl border transition-all duration-300 ${
+      className={`rounded-2xl p-6 md:p-8 border ${
         darkMode
-          ? "bg-slate-900 border-slate-700"
-          : "bg-white border-gray-200 hover:shadow-2xl"
+          ? "bg-slate-900 border-slate-800"
+          : "bg-white border-gray-200 shadow-sm"
       }`}
     >
-      {/* ================= TOP HEADER ================= */}
+      {/* ================= TABS ================= */}
 
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">
-              {verificationType === "image" ? "🖼️" : "🔍"}
-            </span>
+      <div
+        role="tablist"
+        aria-label="Verification type"
+        className={`inline-flex p-1 rounded-xl border gap-1 ${
+          darkMode ? "bg-slate-800/60 border-slate-700" : "bg-gray-100 border-gray-200"
+        }`}
+      >
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = verificationType === tab.id;
 
-            <h2
-              className={`text-2xl md:text-3xl font-extrabold ${
-                darkMode
-                  ? "text-white"
-                  : "text-gray-900"
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setVerificationType(tab.id)}
+              className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 ${
+                isActive
+                  ? "bg-blue-600 text-white"
+                  : darkMode
+                  ? "text-slate-300 hover:bg-slate-700/60"
+                  : "text-gray-600 hover:bg-white"
               }`}
             >
-              {verificationType === "image"
-                ? "Verify Any Image"
-                : "Verify Any Claim"}
-            </h2>
-          </div>
-
-          <p
-            className={`text-base md:text-lg ${
-              darkMode
-                ? "text-slate-300"
-                : "text-gray-600"
-            }`}
-          >
-            {verificationType === "image"
-              ? "Upload an image and let AI check whether it is real or AI generated."
-              : "Paste a news statement, claim or URL and let AI verify it."}
-          </p>
-        </div>
-
-        {/* AI Badge */}
-        <span
-          className={`hidden sm:inline-flex items-center whitespace-nowrap px-3 py-1.5 rounded-full text-sm font-semibold ${
-            darkMode
-              ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-              : "bg-blue-50 text-blue-700 border border-blue-100"
-          }`}
-        >
-          🤖 AI Powered
-        </span>
-      </div>
-
-      {/* ================= TYPE SWITCH ================= */}
-
-      <div className="flex justify-center mb-6">
-        <div
-          className={`inline-flex p-1 rounded-xl border ${
-            darkMode
-              ? "bg-slate-800 border-slate-700"
-              : "bg-gray-100 border-gray-200"
-          }`}
-        >
-          {/* Text Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setVerificationType("text");
-              setImage(null);
-            }}
-            className={`px-5 sm:px-7 py-2.5 rounded-lg font-semibold transition-all duration-300 ${
-              verificationType === "text"
-                ? "bg-blue-600 text-white shadow-md"
-                : darkMode
-                ? "text-slate-300 hover:bg-slate-700"
-                : "text-gray-600 hover:bg-white"
-            }`}
-          >
-            📝 Text Claim
-          </button>
-
-          {/* Image Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setVerificationType("image");
-              setClaim("");
-            }}
-            className={`px-5 sm:px-7 py-2.5 rounded-lg font-semibold transition-all duration-300 ${
-              verificationType === "image"
-                ? "bg-blue-600 text-white shadow-md"
-                : darkMode
-                ? "text-slate-300 hover:bg-slate-700"
-                : "text-gray-600 hover:bg-white"
-            }`}
-          >
-            🖼️ Image
-          </button>
-        </div>
+              <Icon className="w-4 h-4" aria-hidden="true" />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* ================================================= */}
-      {/* TEXT VERIFICATION */}
+      {/* TEXT / CLAIM VERIFICATION */}
       {/* ================================================= */}
 
       {verificationType === "text" && (
-        <>
-          {/* Textarea */}
+        <div className="mt-6">
+          <label htmlFor="claim-input" className="sr-only">
+            Claim to verify
+          </label>
+
           <div className="relative">
             <textarea
+              id="claim-input"
               rows={6}
-              maxLength={500}
+              maxLength={MAX_CLAIM_LENGTH}
               value={claim}
               onChange={(e) => setClaim(e.target.value)}
-              placeholder="Example: The Taj Mahal is located in Delhi."
-              className={`w-full rounded-2xl p-5 pb-12 text-base md:text-lg resize-none outline-none transition-all duration-300 ${
+              placeholder="e.g. The Great Wall of China is visible from space with the naked eye."
+              className={`w-full rounded-xl p-4 pb-10 text-base resize-none outline-none transition-colors duration-200 ${
                 darkMode
                   ? "bg-slate-800 border border-slate-700 text-white placeholder-slate-500"
                   : "bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400"
-              } focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10`}
+              } focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20`}
             />
 
-            {/* Character Counter */}
             <span
-              className={`absolute bottom-4 right-4 text-sm ${
-                darkMode
-                  ? "text-slate-500"
-                  : "text-gray-400"
+              className={`absolute bottom-3 right-4 text-xs tabular-nums ${
+                darkMode ? "text-slate-500" : "text-gray-400"
               }`}
             >
-              {claim.length}/500
+              {claim.length}/{MAX_CLAIM_LENGTH}
             </span>
           </div>
 
-          {/* Bottom Controls */}
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <span
-              className={`text-sm ${
-                darkMode
-                  ? "text-slate-400"
-                  : "text-gray-500"
-              }`}
-            >
-              💡 Enter your claim or paste a URL
+          <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span className={`text-xs ${darkMode ? "text-slate-500" : "text-gray-500"}`}>
+              Paste a statement, headline, or claim you want checked.
             </span>
 
-            {/* Voice Button */}
             <button
               type="button"
               onClick={startListening}
               disabled={listening || loading}
-              className={`px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 ${
+              aria-label={listening ? "Listening for speech" : "Speak your claim"}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 listening
                   ? "bg-red-500 text-white"
                   : darkMode
-                  ? "bg-slate-800 text-purple-400 border border-slate-700 hover:bg-slate-700"
-                  : "bg-purple-50 text-purple-700 border border-purple-100 hover:bg-purple-100"
+                  ? "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                  : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              {listening
-                ? "🎙️ Listening..."
-                : "🎤 Speak Claim"}
+              {listening ? (
+                <Square className="w-3.5 h-3.5" aria-hidden="true" />
+              ) : (
+                <Mic className="w-3.5 h-3.5" aria-hidden="true" />
+              )}
+              {listening ? "Listening…" : "Speak"}
             </button>
           </div>
 
-          {/* Error */}
           {error && (
             <div
-              className={`mt-5 px-4 py-3 rounded-xl text-sm font-medium ${
+              role="alert"
+              className={`mt-4 flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium ${
                 darkMode
                   ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                  : "bg-red-50 text-red-600 border border-red-100"
+                  : "bg-red-50 text-red-700 border border-red-100"
               }`}
             >
-              ⚠️ {error}
+              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span>{error}</span>
             </div>
           )}
 
-          {/* Verify Button */}
           <button
             type="button"
             onClick={handleVerify}
             disabled={loading}
-            className={`w-full mt-6 rounded-2xl py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 ${
-              darkMode
-                ? "bg-blue-500 hover:bg-blue-600"
-                : "bg-blue-600 hover:bg-blue-700"
-            } hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`w-full mt-5 inline-flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-colors duration-200 ${
+              darkMode ? "bg-blue-600 hover:bg-blue-500" : "bg-blue-600 hover:bg-blue-700"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
           >
-            {loading
-              ? "⏳ Verifying..."
-              : "🔍 Verify Claim"}
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Search className="w-4 h-4" aria-hidden="true" />
+            )}
+            {loading ? "Verifying…" : "Verify Claim"}
           </button>
+        </div>
+      )}
 
-          {/* Trust Text */}
-          <p
-            className={`mt-4 text-center text-xs ${
+      {/* ================================================= */}
+      {/* URL / ARTICLE VERIFICATION */}
+      {/* ================================================= */}
+
+      {verificationType === "url" && (
+        <div className="mt-6">
+          <label htmlFor="url-input" className="sr-only">
+            Article URL to verify
+          </label>
+
+          <input
+            id="url-input"
+            type="url"
+            inputMode="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com/news/article"
+            className={`w-full rounded-xl p-4 text-base outline-none transition-colors duration-200 ${
               darkMode
-                ? "text-slate-500"
-                : "text-gray-400"
-            }`}
-          >
-            AI analyzes your claim using relevant information
-            and trusted sources.
+                ? "bg-slate-800 border border-slate-700 text-white placeholder-slate-500"
+                : "bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400"
+            } focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20`}
+          />
+
+          <p className={`mt-3 text-xs ${darkMode ? "text-slate-500" : "text-gray-500"}`}>
+            We'll fetch the article, pull out its main claim, and check it against
+            independent sources. Pages behind a login or paywall can't be read.
           </p>
-        </>
+
+          {urlError && (
+            <div
+              role="alert"
+              className={`mt-4 flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium ${
+                darkMode
+                  ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                  : "bg-red-50 text-red-700 border border-red-100"
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span>{urlError}</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleUrlVerify}
+            disabled={urlLoading}
+            className={`w-full mt-5 inline-flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-colors duration-200 ${
+              darkMode ? "bg-blue-600 hover:bg-blue-500" : "bg-blue-600 hover:bg-blue-700"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
+          >
+            {urlLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Link2 className="w-4 h-4" aria-hidden="true" />
+            )}
+            {urlLoading ? "Verifying…" : "Verify Article"}
+          </button>
+        </div>
       )}
 
       {/* ================================================= */}
@@ -285,14 +295,13 @@ function ClaimInput({
       {/* ================================================= */}
 
       {verificationType === "image" && (
-        <>
-          {/* Upload Area */}
+        <div className="mt-6">
           <label
             htmlFor="image-upload"
-            className={`block w-full rounded-2xl border-2 border-dashed p-8 md:p-12 text-center cursor-pointer transition-all duration-300 ${
+            className={`block w-full rounded-xl border-2 border-dashed p-8 md:p-10 text-center cursor-pointer transition-colors duration-200 ${
               darkMode
-                ? "bg-slate-800/70 border-slate-600 hover:border-blue-500 hover:bg-slate-800"
-                : "bg-gray-50 border-gray-300 hover:border-blue-500 hover:bg-blue-50/40"
+                ? "bg-slate-800/50 border-slate-700 hover:border-blue-500"
+                : "bg-gray-50 border-gray-300 hover:border-blue-400"
             }`}
           >
             <input
@@ -300,119 +309,96 @@ function ClaimInput({
               type="file"
               accept="image/png,image/jpeg,image/jpg,image/webp"
               onChange={handleImageChange}
-              className="hidden"
+              className="sr-only"
             />
 
             {!image ? (
               <>
-                <div className="text-5xl mb-4">
-                  🖼️
-                </div>
-
-                <h3
-                  className={`text-xl font-bold ${
-                    darkMode
-                      ? "text-white"
-                      : "text-gray-900"
+                <ImagePlus
+                  className={`w-8 h-8 mx-auto ${
+                    darkMode ? "text-slate-500" : "text-gray-400"
                   }`}
-                >
-                  Upload an Image
-                </h3>
+                  aria-hidden="true"
+                />
 
                 <p
-                  className={`mt-2 text-sm ${
-                    darkMode
-                      ? "text-slate-400"
-                      : "text-gray-500"
+                  className={`mt-3 text-sm font-semibold ${
+                    darkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  Click to browse or choose an image
+                  Click to upload an image
                 </p>
 
-                <p
-                  className={`mt-3 text-xs ${
-                    darkMode
-                      ? "text-slate-500"
-                      : "text-gray-400"
-                  }`}
-                >
-                  PNG, JPG, JPEG or WEBP • Max 10 MB
+                <p className={`mt-1 text-xs ${darkMode ? "text-slate-500" : "text-gray-400"}`}>
+                  PNG, JPG, JPEG or WEBP · Max 10 MB
                 </p>
               </>
             ) : (
               <>
-                <div className="text-4xl mb-3">
-                  ✅
-                </div>
+                <CheckCircle2
+                  className="w-8 h-8 mx-auto text-emerald-500"
+                  aria-hidden="true"
+                />
 
-                <h3
-                  className={`text-lg font-bold break-all ${
-                    darkMode
-                      ? "text-white"
-                      : "text-gray-900"
+                <p
+                  className={`mt-3 text-sm font-semibold break-all ${
+                    darkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
                   {image.name}
-                </h3>
+                </p>
 
-                <p
-                  className={`mt-2 text-sm ${
-                    darkMode
-                      ? "text-slate-400"
-                      : "text-gray-500"
-                  }`}
-                >
-                  Image selected successfully
+                <p className={`mt-1 text-xs ${darkMode ? "text-slate-500" : "text-gray-400"}`}>
+                  Click to choose a different image
                 </p>
               </>
             )}
           </label>
 
-          {/* Selected Image Preview */}
           {image && (
             <div
-              className={`mt-5 rounded-2xl overflow-hidden border ${
-                darkMode
-                  ? "border-slate-700 bg-slate-800"
-                  : "border-gray-200 bg-gray-50"
+              className={`mt-4 rounded-xl overflow-hidden border ${
+                darkMode ? "border-slate-700 bg-slate-800" : "border-gray-200 bg-gray-50"
               }`}
             >
               <img
                 src={URL.createObjectURL(image)}
-                alt="Selected"
-                className="w-full max-h-80 object-contain"
+                alt="Selected file preview"
+                className="w-full max-h-72 object-contain"
               />
             </div>
           )}
 
-          {/* Analyze Image Button */}
+          {imageError && (
+            <div
+              role="alert"
+              className={`mt-4 flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium ${
+                darkMode
+                  ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                  : "bg-red-50 text-red-700 border border-red-100"
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <span>{imageError}</span>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleImageVerify}
             disabled={!image || imageLoading}
-            className={`w-full mt-6 rounded-2xl py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 ${
-              darkMode
-                ? "bg-blue-500 hover:bg-blue-600"
-                : "bg-blue-600 hover:bg-blue-700"
-            } hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`w-full mt-5 inline-flex items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-colors duration-200 ${
+              darkMode ? "bg-blue-600 hover:bg-blue-500" : "bg-blue-600 hover:bg-blue-700"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
           >
-            {imageLoading
-              ? "⏳ Analyzing Image..."
-              : "🖼️ Analyze Image"}
+            {imageLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <ImagePlus className="w-4 h-4" aria-hidden="true" />
+            )}
+            {imageLoading ? "Analyzing…" : "Analyze Image"}
           </button>
-
-          {/* Image Trust Text */}
-          <p
-            className={`mt-4 text-center text-xs ${
-              darkMode
-                ? "text-slate-500"
-                : "text-gray-400"
-            }`}
-          >
-            AI will analyze the uploaded image for signs of
-            AI generation.
-          </p>
-        </>
+        </div>
       )}
     </div>
   );
